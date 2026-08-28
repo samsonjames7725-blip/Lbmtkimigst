@@ -4,9 +4,8 @@ generator client {
 }
 
 datasource db {
-  provider  = "postgresql"
-  url       = env("DATABASE_URL")
-  directUrl = env("DIRECT_URL")
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
 }
 
 model Company {
@@ -28,20 +27,18 @@ model Company {
   status             String   @default("ACTIVE")
   createdAt          DateTime @default(now())
   updatedAt          DateTime @updatedAt
-
-  users             UserCompany[]
-  customers         Customer[]
-  products          Product[]
-  auditLogs         AuditLog[]
-  leads             Lead[]
-  tenderSources     TenderSource[]
-  enquiries         Enquiry[]
-  messageDrafts     MessageDraft[]
-  approvalRequests  ApprovalRequest[]
-  webResearchRuns   WebResearchRun[]
-  marketSignals     MarketSignal[]
-  leadWatchlists    LeadWatchlist[]
-
+  users              UserCompany[]
+  customers          Customer[]
+  products           Product[]
+  auditLogs          AuditLog[]
+  leads              Lead[]
+  tenderSources      TenderSource[]
+  enquiries          Enquiry[]
+  messageDrafts      MessageDraft[]
+  approvalRequests   ApprovalRequest[]
+  webResearchRuns    WebResearchRun[]
+  marketSignals      MarketSignal[]
+  leadWatchlists     LeadWatchlist[]
   @@map("companies")
 }
 
@@ -158,31 +155,22 @@ model TenderSource {
 model Lead {
   id                  String    @id @default(cuid())
   companyId           String
-  customerId          String?
   organizationName    String
-  legalName           String?
-  organizationType    String?
-  website             String?
-  city                String?
-  state               String?
-  country             String    @default("IN")
   title               String
   description         String?   @db.Text
   category            String?
-  relevance           String    @default("POSSIBLY_RELEVANT")
-  estimatedValueMin   Decimal?  @db.Decimal(18, 2)
-  estimatedValueMax   Decimal?  @db.Decimal(18, 2)
-  currency            String    @default("INR")
-  deadline            DateTime?
-  tenderNumber        String?
+  city                String?
+  state               String?
+  country             String    @default("IN")
   status              String    @default("DISCOVERED")
   confidence          String    @default("UNVERIFIED")
   opportunityScore    Int?
-  businessFit         String?
   recommendedAction   String?
-  sourceId            String?
   primarySourceUrl    String?   @db.Text
-  isPossibleDuplicate Boolean   @default(false)
+  tenderNumber        String?
+  deadline            DateTime?
+  estimatedValueMax   Decimal?  @db.Decimal(18, 2)
+  sourceId            String?
   discoveredAt        DateTime  @default(now())
   createdAt           DateTime  @default(now())
   updatedAt           DateTime  @updatedAt
@@ -194,81 +182,59 @@ model Lead {
   enquiries           Enquiry[]
   drafts              MessageDraft[]
   @@index([companyId, status])
-  @@index([companyId, opportunityScore])
   @@map("leads")
 }
 
 model LeadEvidence {
-  id           String    @id @default(cuid())
+  id           String   @id @default(cuid())
   leadId       String
   sourceId     String?
-  sourceUrl    String    @db.Text
+  sourceUrl    String   @db.Text
   title        String?
-  description  String?   @db.Text
-  publishedAt  DateTime?
-  retrievedAt  DateTime  @default(now())
   evidenceType String
-  snippet      String?   @db.Text
-  metadata     Json?
-  createdAt    DateTime  @default(now())
-  lead         Lead      @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  snippet      String?  @db.Text
+  retrievedAt  DateTime @default(now())
+  createdAt    DateTime @default(now())
+  lead         Lead     @relation(fields: [leadId], references: [id], onDelete: Cascade)
   source       TenderSource? @relation(fields: [sourceId], references: [id], onDelete: SetNull)
-  @@index([leadId])
   @@map("lead_evidence")
 }
 
 model LeadScore {
-  id                      String   @id @default(cuid())
-  leadId                  String   @unique
-  totalScore              Int
-  sourceCredibility       Int      @default(0)
-  healthcareRelevance     Int      @default(0)
-  businessFitScore        Int      @default(0)
-  opportunityValue        Int      @default(0)
-  deadlineUrgency         Int      @default(0)
-  organizationConfidence  Int      @default(0)
-  contactAvailability     Int      @default(0)
-  dataCompleteness        Int      @default(0)
-  crossSourceConfirmation Int      @default(0)
-  explanation             Json?
-  calculatedAt            DateTime @default(now())
-  createdAt               DateTime @default(now())
-  updatedAt               DateTime @updatedAt
-  lead                    Lead     @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  id         String   @id @default(cuid())
+  leadId     String   @unique
+  totalScore Int
+  explanation Json?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  lead       Lead     @relation(fields: [leadId], references: [id], onDelete: Cascade)
   @@map("lead_scores")
 }
 
 model LeadContact {
-  id          String   @id @default(cuid())
-  leadId      String
-  name        String?
-  designation String?
-  email       String?
-  phone       String?
-  confidence  String?
-  createdAt   DateTime @default(now())
-  lead        Lead     @relation(fields: [leadId], references: [id], onDelete: Cascade)
-  @@index([leadId])
+  id     String  @id @default(cuid())
+  leadId String
+  name   String?
+  email  String?
+  phone  String?
+  lead   Lead    @relation(fields: [leadId], references: [id], onDelete: Cascade)
   @@map("lead_contacts")
 }
 
 model Enquiry {
-  id         String   @id @default(cuid())
-  companyId  String
-  leadId     String?
-  source     String
-  subject    String?
-  message    String?  @db.Text
-  receivedAt DateTime @default(now())
-  status     String   @default("NEW")
-  priority   String   @default("MEDIUM")
-  intent     String?
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
-  company    Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
-  lead       Lead?    @relation(fields: [leadId], references: [id], onDelete: SetNull)
-  drafts     MessageDraft[]
-  @@index([companyId, status])
+  id        String   @id @default(cuid())
+  companyId String
+  leadId    String?
+  source    String
+  subject   String?
+  message   String?  @db.Text
+  status    String   @default("NEW")
+  priority  String   @default("MEDIUM")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  company   Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  lead      Lead?    @relation(fields: [leadId], references: [id], onDelete: SetNull)
+  drafts    MessageDraft[]
   @@map("enquiries")
 }
 
@@ -280,58 +246,42 @@ model MessageDraft {
   channel           String
   subject           String?
   body              String   @db.Text
-  generatedBy       String?
   status            String   @default("DRAFT")
   approvalRequestId String?
-  recipientEmail    String?
-  recipientPhone    String?
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
   company           Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
   lead              Lead?    @relation(fields: [leadId], references: [id], onDelete: SetNull)
   enquiry           Enquiry? @relation(fields: [enquiryId], references: [id], onDelete: SetNull)
   approvalRequest   ApprovalRequest? @relation(fields: [approvalRequestId], references: [id], onDelete: SetNull)
-  @@index([companyId, status])
   @@map("message_drafts")
 }
 
 model ApprovalRequest {
-  id               String    @id @default(cuid())
-  companyId        String
-  requestedBy      String?
-  actionType       String
-  entityType       String?
-  entityId         String?
-  draftContent     String?   @db.Text
-  channel          String?
-  status           String    @default("PENDING")
-  approvedBy       String?
-  approvedAt       DateTime?
-  rejectedBy       String?
-  rejectedAt       DateTime?
-  rejectionReason  String?   @db.Text
-  createdAt        DateTime  @default(now())
-  updatedAt        DateTime  @updatedAt
-  company          Company   @relation(fields: [companyId], references: [id], onDelete: Cascade)
-  drafts           MessageDraft[]
-  @@index([companyId, status])
+  id           String    @id @default(cuid())
+  companyId    String
+  actionType   String
+  draftContent String?   @db.Text
+  channel      String?
+  status       String    @default("PENDING")
+  approvedBy   String?
+  approvedAt   DateTime?
+  rejectedBy   String?
+  rejectedAt   DateTime?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  company      Company   @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  drafts       MessageDraft[]
   @@map("approval_requests")
 }
 
 model WebResearchRun {
-  id          String    @id @default(cuid())
-  companyId   String
-  userId      String?
-  query       String    @db.Text
-  parameters  Json?
-  startedAt   DateTime  @default(now())
-  completedAt DateTime?
-  status      String    @default("RUNNING")
-  resultCount Int       @default(0)
-  error       String?   @db.Text
-  results     Json?
-  createdAt   DateTime  @default(now())
-  company     Company   @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  id        String   @id @default(cuid())
+  companyId String
+  query     String   @db.Text
+  status    String   @default("RUNNING")
+  createdAt DateTime @default(now())
+  company   Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
   @@map("web_research_runs")
 }
 
@@ -340,11 +290,6 @@ model MarketSignal {
   companyId    String
   organization String
   signalType   String
-  description  String?  @db.Text
-  location     String?
-  sourceUrl    String?  @db.Text
-  confidence   String?
-  detectedAt   DateTime @default(now())
   status       String   @default("NEW")
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
@@ -355,9 +300,7 @@ model MarketSignal {
 model LeadWatchlist {
   id        String   @id @default(cuid())
   companyId String
-  userId    String?
   name      String
-  keywords  String?  @db.Text
   isActive  Boolean  @default(true)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
