@@ -1,100 +1,68 @@
-# LIFEBridge MedTech — Business OS + GST DAS + Business Intelligence
+# LIFEBridge MedTech — Business OS + GST + Business Intelligence
 
-**Repository:** `Lbmtkimigst`  
-**Owner:** samsonjames7725-blip  
-**Version:** 7.0.0 (Agent 3 integrated)
+**Repo:** [samsonjames7725-blip/Lbmtkimigst](https://github.com/samsonjames7725-blip/Lbmtkimigst)  
+**Version:** 7.0.0 · Agent 3 · Supabase PostgreSQL
 
 ## Architecture
 
+One Next.js app · One Prisma schema · One Supabase PostgreSQL database
+
 ```
-                 LIFEBridge MEDTECH MOS
-                         │
-                 ONE APPLICATION
-                         │
-                 ONE MYSQL DATABASE
-                         │
-                  ONE PRISMA SCHEMA
-                         │
-        ┌────────────────┼────────────────┐
-        │                │                │
-    BUSINESS OS       GST DAS       INTELLIGENCE
-        │                │                │
-     Finance          GST Engine       Discovery
-     Billing          ITC             Research
-     CRM               RCM             Leads
-     Inventory         Returns         Tenders
-     Procurement       Reconciliation  Enquiries
-     Projects                          Scoring
-     Assets                            Evidence
-     Service                           AI
-        │                                │
-        └────────────────┬───────────────┘
-                         │
-                  HUMAN APPROVAL
-                         │
-                  EMAIL / WHATSAPP
+Business OS  +  GST DAS  +  Intelligence (Agent 3)
+     │              │              │
+  Finance        GST Engine    Leads / Tenders
+  CRM            ITC/RCM       Scoring / Evidence
+  Billing        Returns       Approvals (human-only)
 ```
 
-## Agent 3 — Business Intelligence & Lead Acquisition
-
-- Configurable source registry (`TenderSource`)
-- Lead discovery with evidence & explainable scoring
-- Deduplication across sources
-- Enquiry classification
-- AI message drafting with **mandatory human approval**
-- Market signals & watchlists
-- Full audit trail & company isolation
-
-See `docs/business-intelligence.md` for details.
-
-## Stack
-
-- Next.js 16 + React 19 + TypeScript
-- Prisma 6 + MySQL
-- Zod validation
-- Tailwind CSS 4
-- jose (sessions) + bcryptjs
-
-## Quick Start
+## Quick start
 
 ```bash
-cp .env.example .env
-# set DATABASE_URL and optional OPENAI_API_KEY / SEARCH_API_KEY
-
+git clone https://github.com/samsonjames7725-blip/Lbmtkimigst.git
+cd Lbmtkimigst
 npm install
+
+# Create .env.local — see docs/FIX_AND_SETUP.md
 npx prisma generate
 npx prisma db push
 npm run dev
 ```
 
-## Security Rules (non-negotiable)
+## Supabase
 
-1. No automatic external email / WhatsApp — human approval required.
-2. All APIs enforce authentication + company scope + RBAC.
-3. Never fabricate leads, tenders, contacts or tender numbers.
-4. Always store and expose original source URL.
-5. Do not scrape sites that disallow automated access.
+- Project: `tnobrqfxmrwpuxkdsycd`
+- URL: https://tnobrqfxmrwpuxkdsycd.supabase.co
+- Full setup: [docs/FIX_AND_SETUP.md](docs/FIX_AND_SETUP.md)
+- BI design: [docs/business-intelligence.md](docs/business-intelligence.md)
 
-## Status
+## Routes
+
+| Path | Purpose |
+|------|---------|
+| `/login` | Auth |
+| `/dashboard` | Executive dashboard |
+| `/intelligence` | Lead radar (Agent 3) |
+| `/approvals` | Human approval (no auto-send) |
+
+## Security rules
+
+1. **No automatic email/WhatsApp** — human approval required
+2. Company isolation on all intelligence APIs
+3. Original source URL always stored on leads
+4. Explainable scores (0–100 breakdown)
+5. Secrets only in `.env.local` (never committed)
+
+## Stack
+
+Next.js 16 · React 19 · Prisma 6 · PostgreSQL (Supabase) · Zod · jose · Tailwind 4 · @supabase/ssr
+
+## Status (fixed)
 
 | Area | Status |
 |------|--------|
-| Core Business OS + GST | Inherited / present |
-| Prisma schema (Agent 3 models) | **IMPLEMENTED** |
-| Scoring engine | **IMPLEMENTED** |
-| Discovery services / APIs / UI | SCAFFOLDED — next iteration |
-| Email / WhatsApp providers | REQUIRES EXTERNAL CONFIG |
-| Tests (critical paths) | Pending |
-
-## Environment
-
-```
-DATABASE_URL=
-OPENAI_API_KEY=        # optional
-AI_API_KEY=            # alternative
-SEARCH_API_KEY=        # optional research
-EMAIL_API_KEY=         # optional
-WHATSAPP_API_KEY=      # optional
-```
-
-Never use `NEXT_PUBLIC_` for secrets.
+| Prisma → PostgreSQL | Done |
+| Schema validates | Done |
+| AUTH_SECRET / SESSION_SECRET | Fixed |
+| Supabase SSR clients + middleware | On GitHub |
+| Scoring + lead service + approval APIs | Working tree |
+| `db push` to Supabase | Run on your machine (DB host not reachable from CI) |
